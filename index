@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú de Sorbetes Enchilados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #4b0082;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .menu-container {
+            max-width: 500px;
+            margin: auto;
+            background: #5c2e91;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffc107;
+        }
+        .options {
+            margin: 15px 0;
+            text-align: left;
+        }
+        .prices, .spicy-level {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        label {
+            font-weight: bold;
+        }
+        .add-btn, .send-btn {
+            background-color: #ffc107;
+            color: #4b0082;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .add-btn:hover, .send-btn:hover {
+            background-color: #e0a800;
+        }
+        .order-list {
+            text-align: left;
+            background-color: #613a94;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .total-price {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 15px;
+            color: #ffc107;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .menu-container {
+                padding: 15px;
+                width: 90%;
+            }
+            .prices, .spicy-level {
+                flex-direction: column;
+            }
+            .add-btn, .send-btn {
+                width: 100%;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-container">
+        <div class="title">SORBETES ENCHILADOS</div>
+        <div class="subtitle">Sorbetes Artesanales</div>
+        <p>Con limón, alguashte, chile líquido, chile en polvo.</p>
+        
+        <div class="options">
+            <label for="flavor">Sabor:</label>
+            <select id="flavor">
+                <option value="Mango Verde">Mango Verde</option>
+                <option value="Mango Maduro">Mango Maduro</option>
+                <option value="Jocote">Jocote</option>
+                <option value="Tamarindo">Tamarindo</option>
+                <option value="Mamey">Mamey</option>
+                <option value="Maracuyá">Maracuyá</option>
+                <option value="Mora">Mora</option>
+                <option value="Piña">Piña</option>
+                <option value="Arrayán">Arrayán</option>
+            </select>
+        </div>
+        
+        <div class="options">
+            <label>Nivel de Picante:</label>
+            <div class="spicy-level">
+                <label><input type="radio" name="spice" value="Poco"> Poco</label>
+                <label><input type="radio" name="spice" value="Medio"> Medio</label>
+                <label><input type="radio" name="spice" value="Mucho"> Mucho</label>
+            </div>
+        </div>
+        
+        <div class="options">
+            <label>Tamaño:</label>
+            <div class="prices">
+                <label><input type="radio" name="size" value="Sencillo" data-price="1.75"> Sencillo - $1.75</label>
+                <label><input type="radio" name="size" value="XL" data-price="3.00"> XL - $3.00</label>
+                <label><input type="radio" name="size" value="XXL" data-price="4.25"> XXL - $4.25</label>
+            </div>
+        </div>
+
+        <div class="options">
+            <label for="quantity">Cantidad:</label>
+            <input type="number" id="quantity" min="1" value="1">
+        </div>
+
+        <button class="add-btn" onclick="addOrder()">Agregar al Pedido</button>
+        
+        <div class="order-list" id="orderList">
+            <h3>Mi Pedido</h3>
+            <ul id="orderItems"></ul>
+            <div class="total-price" id="totalPrice">Total: $0.00</div>
+        </div>
+
+        <button class="send-btn" onclick="sendOrder()">Enviar Pedido a WhatsApp</button>
+    </div>
+
+    <script>
+        const orderList = [];
+        let total = 0;
+
+        function addOrder() {
+            const flavor = document.getElementById('flavor').value;
+            const spice = document.querySelector('input[name="spice"]:checked')?.value || 'No especificado';
+            const sizeElement = document.querySelector('input[name="size"]:checked');
+            const size = sizeElement?.value || 'No especificado';
+            const price = parseFloat(sizeElement?.dataset.price || 0);
+            const quantity = parseInt(document.getElementById('quantity').value);
+
+            if (!sizeElement) {
+                alert("Por favor, selecciona un tamaño.");
+                return;
+            }
+
+            const orderItem = `- ${quantity} x Sorbete (${size}) de sabor ${flavor} con nivel de picante ${spice}`;
+            orderList.push({ item: orderItem, total: price * quantity });
+            total += price * quantity;
+            displayOrderList();
+            updateTotal();
+        }
+
+        function displayOrderList() {
+            const orderItems = document.getElementById('orderItems');
+            orderItems.innerHTML = "";
+            orderList.forEach(order => {
+                const li = document.createElement('li');
+                li.textContent = order.item;
+                orderItems.appendChild(li);
+            });
+        }
+
+        function updateTotal() {
+            const totalPrice = document.getElementById('totalPrice');
+            totalPrice.textContent = `Total: $${total.toFixed(2)}`;
+        }
+
+        function sendOrder() {
+            if (orderList.length === 0) {
+                alert("Por favor, agrega al menos un artículo a tu pedido.");
+                return;
+            }
+            const message = `¡Hola! Quiero hacer un pedido:\n${orderList.map(order => order.item).join('\n')}\nTotal: $${total.toFixed(2)}`;
+            const phone = "+50372641969"; // Reemplaza con el número de WhatsApp
+
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+    </script>
+</body>
+</html>
