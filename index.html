@@ -207,7 +207,7 @@
                 return;
             }
             const message = `¡Hola! Quiero hacer un pedido:\n${orderList.map(order => order.item).join('\n')}\nTotal: $${total.toFixed(2)}\nDirección de envío: ${address}`;
-            const phone = "1234567890"; // Reemplaza con el número de WhatsApp
+            const phone = "+50363098599"; // Reemplaza con el número de WhatsApp
 
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
         }
