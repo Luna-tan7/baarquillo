@@ -69,6 +69,16 @@
             margin-top: 15px;
             color: #ffc107;
         }
+        .address-container {
+            margin: 15px 0;
+            text-align: left;
+        }
+        .address-container textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+        }
 
         /* Responsive */
         @media (max-width: 600px) {
@@ -138,6 +148,12 @@
             <div class="total-price" id="totalPrice">Total: $0.00</div>
         </div>
 
+        <div class="address-container">
+            <label for="address">Dirección de Envío:</label>
+            <textarea id="address" rows="3" placeholder="Ingresa la dirección de envío..."></textarea>
+        </div>
+
+        <button class="send-btn" onclick="sendLocation()">Enviar mi Localización</button>
         <button class="send-btn" onclick="sendOrder()">Enviar Pedido a WhatsApp</button>
     </div>
 
@@ -185,10 +201,32 @@
                 alert("Por favor, agrega al menos un artículo a tu pedido.");
                 return;
             }
-            const message = `¡Hola! Quiero hacer un pedido:\n${orderList.map(order => order.item).join('\n')}\nTotal: $${total.toFixed(2)}`;
-            const phone = "+50372641969"; // Reemplaza con el número de WhatsApp
+            const address = document.getElementById('address').value;
+            if (!address) {
+                alert("Por favor, ingresa una dirección de envío.");
+                return;
+            }
+            const message = `¡Hola! Quiero hacer un pedido:\n${orderList.map(order => order.item).join('\n')}\nTotal: $${total.toFixed(2)}\nDirección de envío: ${address}`;
+            const phone = "1234567890"; // Reemplaza con el número de WhatsApp
 
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        function sendLocation() {
+            if (!navigator.geolocation) {
+                alert("Tu navegador no soporta geolocalización.");
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(position => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                const locationMessage = `¡Hola! Aquí está mi ubicación para el envío:\nhttps://www.google.com/maps?q=${latitude},${longitude}`;
+                const phone = "1234567890"; // Reemplaza con el número de WhatsApp
+
+                window.open(`https://wa.me/${phone}?text=${encodeURIComponent(locationMessage)}`, '_blank');
+            }, () => {
+                alert("No se pudo obtener tu ubicación. Por favor, habilita la geolocalización.");
+            });
         }
     </script>
 </body>
