@@ -43,7 +43,7 @@
         label {
             font-weight: bold;
         }
-        .add-btn, .send-btn {
+        .add-btn, .send-btn, .location-btn {
             background-color: #ffc107;
             color: #4b0082;
             padding: 10px 20px;
@@ -53,7 +53,7 @@
             font-size: 16px;
             margin-top: 10px;
         }
-        .add-btn:hover, .send-btn:hover {
+        .add-btn:hover, .send-btn:hover, .location-btn:hover {
             background-color: #e0a800;
         }
         .order-list {
@@ -69,30 +69,15 @@
             margin-top: 15px;
             color: #ffc107;
         }
-        .address-container {
-            margin: 15px 0;
-            text-align: left;
+        .location-container {
+            margin-top: 15px;
         }
-        .address-container textarea {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
+        input[type="text"], input[type="number"] {
+            width: calc(100% - 20px);
+            padding: 5px;
+            margin: 10px 0;
             border: none;
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .menu-container {
-                padding: 15px;
-                width: 90%;
-            }
-            .prices, .spicy-level {
-                flex-direction: column;
-            }
-            .add-btn, .send-btn {
-                width: 100%;
-                padding: 10px;
-            }
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -148,18 +133,19 @@
             <div class="total-price" id="totalPrice">Total: $0.00</div>
         </div>
 
-        <div class="address-container">
-            <label for="address">Dirección de Envío:</label>
-            <textarea id="address" rows="3" placeholder="Ingresa la dirección de envío..."></textarea>
+        <div class="location-container">
+            <label for="address">Dirección:</label>
+            <input type="text" id="address" placeholder="Escribe tu dirección">
+            <button class="location-btn" onclick="getLocation()">Usar mi ubicación actual</button>
         </div>
 
-        <button class="send-btn" onclick="sendLocation()">Enviar mi Localización</button>
         <button class="send-btn" onclick="sendOrder()">Enviar Pedido a WhatsApp</button>
     </div>
 
     <script>
         const orderList = [];
         let total = 0;
+        let userLocation = '';
 
         function addOrder() {
             const flavor = document.getElementById('flavor').value;
@@ -196,37 +182,32 @@
             totalPrice.textContent = `Total: $${total.toFixed(2)}`;
         }
 
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    userLocation = `https://www.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
+                    alert("¡Ubicación obtenida!");
+                }, () => {
+                    alert("No se pudo obtener la ubicación.");
+                });
+            } else {
+                alert("Tu navegador no soporta geolocalización.");
+            }
+        }
+
         function sendOrder() {
             if (orderList.length === 0) {
                 alert("Por favor, agrega al menos un artículo a tu pedido.");
                 return;
             }
-            const address = document.getElementById('address').value;
-            if (!address) {
-                alert("Por favor, ingresa una dirección de envío.");
-                return;
-            }
-            const message = `¡Hola! Quiero hacer un pedido:\n${orderList.map(order => order.item).join('\n')}\nTotal: $${total.toFixed(2)}\nDirección de envío: ${address}`;
-            const phone = "+50363098599"; // Reemplaza con el número de WhatsApp
+
+            const addressInput = document.getElementById('address').value;
+            const address = addressInput || userLocation || 'No especificada';
+
+            const message = `¡Hola! Quiero hacer un pedido:\n${orderList.map(order => order.item).join('\n')}\nTotal: $${total.toFixed(2)}\nDirección: ${address}`;
+            const phone = "72641969"; // Reemplaza con el número de WhatsApp
 
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
-        }
-
-        function sendLocation() {
-            if (!navigator.geolocation) {
-                alert("Tu navegador no soporta geolocalización.");
-                return;
-            }
-            navigator.geolocation.getCurrentPosition(position => {
-                const latitude = position.coords.latitude;
-                const longitude = position.coords.longitude;
-                const locationMessage = `¡Hola! Aquí está mi ubicación para el envío:\nhttps://www.google.com/maps?q=${latitude},${longitude}`;
-                const phone = "72641969"; // Reemplaza con el número de WhatsApp
-
-                window.open(`https://wa.me/${phone}?text=${encodeURIComponent(locationMessage)}`, '_blank');
-            }, () => {
-                alert("No se pudo obtener tu ubicación. Por favor, habilita la geolocalización.");
-            });
         }
     </script>
 </body>
